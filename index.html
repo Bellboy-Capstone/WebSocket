@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Page Properties -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1,
+    shrink-to-fit=no"
+    />
+
+    <!-- Site Title and Description -->
+    <title>WebSocket Service</title>
+
+    <!-- Scripts and Styling -->
+    <script type="application/javascript" async defer>
+      /* JavaScript! */
+      console.log("Hello World!");
+
+      function addText(string, elementId) {
+        var bb = document.getElementById(elementId);
+        var msg = document.createElement("p");
+        msg.innerText = string;
+        bb.appendChild(msg);
+        msg.scrollIntoView();
+      }
+
+      /*
+       * On load operation. Calls a number of functions once the DOM is ready.
+       * All features should be called in this block.
+       */
+      window.addEventListener("load", function (event) {
+        // Feature functions:
+        for (var i = 0; i < 100; i++) {
+          addText(i + " sent", "bellboy-text");
+          addText(i + " received", "website-text");
+        }
+      });
+    </script>
+
+    <style>
+      html,
+      body {
+        background: white;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        height: 98%;
+        overflow: hidden;
+        text-align: left;
+      }
+      .container {
+        display: flex;
+        height: 98%;
+      }
+      .child {
+        flex: 1;
+        border: 1px solid black;
+        padding: 5px;
+        margin: 5px;
+        height: 98%;
+        display: block;
+      }
+      .scroll-container {
+        border: 1px solid red;
+        height: 80%;
+        overflow-y: scroll;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="child">
+        <h1>Bellboy</h1>
+        <p>Log messages:</p>
+        <div class="scroll-container">
+          <div id="bellboy-text" class="scroll"></div>
+        </div>
+      </div>
+      <div class="child">
+        <h1>Website</h1>
+        <p>Log messages:</p>
+        <div class="scroll-container">
+          <div id="website-text" class="scroll"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

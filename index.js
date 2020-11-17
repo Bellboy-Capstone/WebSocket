@@ -1,7 +1,8 @@
 var http = require("http");
-const WebSocket = require("ws");
+var fs = require("fs");
+var WebSocket = require("ws");
 var webSocketServer = require("websocket").server;
-const webSocketsServerPort = 3000;
+var webSocketsServerPort = 3000;
 
 var clients = []; //list of connected clients
 
@@ -15,7 +16,12 @@ function htmlEntities(str) {
 }
 
 //http server
-var server = http.createServer(function (request, response) {});
+var server = http.createServer(function (request, response) {
+  var homePageHTML = fs.readFileSync("./index.html");
+  response.writeHead(200, { "Content-Type": "text/html" });
+  response.write(homePageHTML);
+  response.end();
+});
 
 //websocket server
 server.listen(webSocketsServerPort, function () {
