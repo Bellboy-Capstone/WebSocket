@@ -13,11 +13,14 @@
     <!-- Site Title and Description -->
     <title>WebSocket Service</title>
 
-    <!-- Scripts and Styling -->
+    <!-- Scripts -->
     <script type="application/javascript" async defer>
-      /* JavaScript! */
-      console.log("Hello World!");
-
+      /**
+       * Appends a string in a paragraph to the target element.
+       *
+       * Call this with 'bellboy-text' or 'website-text' to add 'log data'
+       * to either the bellboy or website columns.
+       */
       function addText(string, elementId) {
         var bb = document.getElementById(elementId);
         var msg = document.createElement("p");
@@ -26,23 +29,43 @@
         msg.scrollIntoView();
       }
 
+      function setupBellboy() {
+        // Creates a websocket connection as the bellboy.
+        let bellboy = new WebSocket("ws://localhost:3000/");
+        bellboy.onopen = function () {
+          bellboy.send("Hello");
+        };
+      }
+
+      function setupWebsite() {
+        // Creates a websocket connection as the bellboy.
+        let bellboy = new WebSocket("ws://localhost:3000/");
+        bellboy.onopen = function () {
+          bellboy.send("Hello");
+        };
+      }
       /*
        * On load operation. Calls a number of functions once the DOM is ready.
-       * All features should be called in this block.
+       * ALL features should be called in this block.
        */
       window.addEventListener("load", function (event) {
         // Feature functions:
+
+        // Test logging
         for (var i = 0; i < 100; i++) {
           addText(i + " sent", "bellboy-text");
           addText(i + " received", "website-text");
         }
+
+        setupBellboy();
+        setupWebsite();
       });
     </script>
 
     <style>
       html,
       body {
-        background: white;
+        background: #aaa;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         height: 98%;
         overflow: hidden;
@@ -53,16 +76,18 @@
         height: 98%;
       }
       .child {
+        background: white;
         flex: 1;
-        border: 1px solid black;
+        border: 2px solid black;
         padding: 5px;
         margin: 5px;
         height: 98%;
         display: block;
+        border-radius: 8px;
       }
       .scroll-container {
-        border: 1px solid red;
         height: 80%;
+        border: 1px solid #ddd;
         overflow-y: scroll;
       }
     </style>
