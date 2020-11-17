@@ -1,0 +1,26 @@
+{
+  "name": "realtime-services",
+  "version": "1.0.0",
+  "description": "Implements websocket server using Node.js to display logs to front-end",
+  "author": "Elma Khandaker",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "yarn test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bellboy-Capstone/WebSocket.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bellboy-Capstone/WebSocket/issues"
+  },
+  "homepage": "https://github.com/Bellboy-Capstone/WebSocket#readme",
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "websocket": "^1.0.32",
+    "ws": "^7.4.0"
+  },
+  "devDependencies": {}
+}
