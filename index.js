@@ -1,28 +1,66 @@
-const express = require('express');
-const http = require('http');
+var http = require('http');
 const WebSocket = require('ws');
-const server = http.createServer(express);
-const wss = new WebSocket.Server({ server:server });
+var webSocketServer= require('websocket').server;
+const webSocketsServerPort = 3000;
+
+var clients = []; //list of connected clients
+
+//helps wtih input strings
+function htmlEntities(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+//http server
+var server = http.createServer(function(request, response) {
+});
+
+//websocket server
+server.listen(webSocketsServerPort, function() {
+console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
+});
+
+//websocket server request
+var wsServer = new webSocketServer({
+     httpServer: server
+});
+
+//gets called everytime a connection occurs with WebSocket
+wsServer.on('request', function(request) {
+    console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
+    var connection = request.accept(null, request.origin);
+    var index = clients.push(connection) - 1;
+    var client_name=true;
+    console.log((' Connection accepted.'));
 
 
-wss.on('connection', function connection(ws) {
-    ws.on('message', function incoming(message) {
-        const message_str = message.toString();
-        wss.clients.forEach(function each(client){
-            if(client !=ws && message.startswith('system')){
-                console.log(`System is connected`);
-                client.send(message);
-            }
-            else if(client !=ws && message.startswith('services')){
-                console.log('Services is connected');
-                client.send(message);
-            }
-        })
-   
+    
+    connection.on('message', function(message) {
+        const readline = require('readline').createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        readline.question('Hello, who is this?', message=> {
+            if (message.type === 'utf8') {
+                if (client_name === true) {
+                    client_name = htmlEntities(message.utf8Data);
+                }
+                else { // log and broadcast the message
+                    console.log((new Date()) + ' Hello !' + message.utf8Data + ',you are connected to BellBoy deivce');
+                }
 
-  })
+        }
+        
+    });
 
-server.listen(port, function() {
-    console.log(`Server is listening on ${port}!`)
-  })
+    connection.on('close', function(connection) {
+        if (client_name !== true ) {
+            console.log(" Peer " + connection.remoteAddress + " disconnected.");
+             // remove client from the list of connected clients
+            clients.splice(index, 1);
+                
+        }
+    });
+});
 });
