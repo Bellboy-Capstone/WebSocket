@@ -2,7 +2,7 @@ var http = require("http");
 var fs = require("fs");
 var WebSocket = require("ws");
 var webSocketServer = require("websocket").server;
-var webSocketsServerPort = 3000;
+var webSocketsServerPort = process.env.PORT || 3000;
 
 var clients = []; //list of connected clients
 
