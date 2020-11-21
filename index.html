@@ -14,6 +14,13 @@
     <title>WebSocket Service</title>
 
     <!-- Scripts -->
+    <article>
+      <form onsubmit = "addText(); return false;">
+        <input type = "text" id = "msg" placeholder = "type and press 
+        enter " />
+     </form>
+
+    </article>
     <script type="application/javascript" async defer>
       /**
        * Appends a string in a paragraph to the target element.
@@ -21,40 +28,69 @@
        * Call this with 'bellboy-text' or 'website-text' to add 'log data'
        * to either the bellboy or website columns.
        */
+       var connected = document.getElementById("connected");
+       var state = document.getElementById("status");
+       var bb = document.getElementById(elementId);
+       var msg = document.createElement("msg");
+
+       function onMessage(event) {
+                 
+                  var message = event.data;
+						
+                  if (message.startsWith("log:")) {
+                     message = message.slice("log:".length);
+                     msg.innerHTML = '<li class = "message">' + 
+                        message + "</li>" + log.innerHTML;
+                  }else if (message.startsWith("connected:")) {
+                     msg = message.slice("connected:".length);
+                     connected.innerHTML = message;
+                  }
+               }
+
       function addText(string, elementId) {
-        var bb = document.getElementById(elementId);
-        var msg = document.createElement("p");
         msg.innerText = string;
         bb.appendChild(msg);
         msg.scrollIntoView();
       }
-      function onMessage(evt){
-            var message = evt.data;
-          if (message.startsWith("log:"))
-          {
-              message = message.slice("log:".length);
-              log.innerHTML = '<li class="message">' + message + "</li>" + log.innerHTML;	
-          }
-          else if (message.startsWith("connected:"))
-          {
-              message = message.slice("connected:".length);
-              connected.innerHTML = message;	
-          }    
+
+      function onLoad() {
+        setupBellboy();
+        setupWebsite();  
       }
+  
+    function onClose(event) {
+      state.className = "fail";
+      state.innerHTML = "Not connected";
+      connected.innerHTML = "0";
+               }
 
       function setupBellboy() {
         // Creates a websocket connection as the bellboy.
-        let bellboy = new WebSocket("ws://localhost:3000/");
+        let bellboy = new WebSocket("ws://localhost:3000/WebSocket");
         bellboy.onopen = function () {
-          bellboy.send("Hello");
+          state.className = "success";
+          state.innerHTML = "Connected to server";
+          connected.innerHTML = "1";
+          bellboy.send("Hello BellBoy");
+          
+          setInterval(function() {
+            if (connected.readyState == "0") {
+               onClose();
+               state.innerHTML = "Unable to communicate with BellBoy server.";
+            }
+          }, 
+          3000);
         };
       }
 
       function setupWebsite() {
-        // Creates a websocket connection as the bellboy.
-        let bellboy = new WebSocket("ws://localhost:3000/");
+        // Creates a websocket connection as the website.
+        let website = new WebSocket("ws://localhost:3000/Website");
         bellboy.onopen = function () {
-          bellboy.send("Hello");
+          state.className = "success";
+          state.innerHTML = "Connected to server";
+          connected.innerHTML = "1";
+          website.send("Hello Website");
         };
       }
       /*
@@ -63,6 +99,7 @@
        */
       window.addEventListener("load", function (event) {
         // Feature functions:
+        onLoad();
         onMessage();
 
         // Test logging
@@ -70,9 +107,8 @@
           addText(i + " sent", "bellboy-text");
           addText(i + " received", "website-text");
         }
+      
 
-        setupBellboy();
-        setupWebsite();
       });
     </script>
 
@@ -121,9 +157,6 @@
         <div class="scroll-container">
           <div id="website-text" class="scroll"></div>
         </div>
-        <div id="content"></div>
-        <script src="./frontend.js"></script>
-
       </div>
     </div>
   </body>
