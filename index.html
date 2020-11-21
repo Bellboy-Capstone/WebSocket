@@ -28,6 +28,19 @@
         bb.appendChild(msg);
         msg.scrollIntoView();
       }
+      function onMessage(evt){
+            var message = evt.data;
+          if (message.startsWith("log:"))
+          {
+              message = message.slice("log:".length);
+              log.innerHTML = '<li class="message">' + message + "</li>" + log.innerHTML;	
+          }
+          else if (message.startsWith("connected:"))
+          {
+              message = message.slice("connected:".length);
+              connected.innerHTML = message;	
+          }    
+      }
 
       function setupBellboy() {
         // Creates a websocket connection as the bellboy.
@@ -50,6 +63,7 @@
        */
       window.addEventListener("load", function (event) {
         // Feature functions:
+        onMessage();
 
         // Test logging
         for (var i = 0; i < 100; i++) {
@@ -107,6 +121,9 @@
         <div class="scroll-container">
           <div id="website-text" class="scroll"></div>
         </div>
+        <div id="content"></div>
+        <script src="./frontend.js"></script>
+
       </div>
     </div>
   </body>
