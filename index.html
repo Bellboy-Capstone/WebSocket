@@ -14,14 +14,10 @@
     <title>WebSocket Service</title>
 
     <!-- Scripts -->
-    <article>
-      <form onsubmit = "addText(); return false;">
-        <input type = "text" id = "msg" placeholder = "type and press 
-        enter " />
-     </form>
-
-    </article>
+    </article> 
     <script type="application/javascript" async defer>
+    (function() {
+      let ws;
       /**
        * Appends a string in a paragraph to the target element.
        *
@@ -32,44 +28,45 @@
        var state = document.getElementById("status");
        var bb = document.getElementById(elementId);
        var msg = document.createElement("msg");
+       
+       const readline = require("readline");
+       const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+       });
 
+      
+      //get "message" from command line input 
        function onMessage(event) {
-                 
-                  var message = event.data;
-						
-                  if (message.startsWith("log:")) {
-                     message = message.slice("log:".length);
-                     msg.innerHTML = '<li class = "message">' + 
-                        message + "</li>" + log.innerHTML;
-                  }else if (message.startsWith("connected:")) {
-                     msg = message.slice("connected:".length);
-                     connected.innerHTML = message;
-                  }
-               }
 
+        r1.message("send message :", function(event) {
+          var message = event.data;
+          console.log(`sent: ` + message);
+          connected.innerHTML=message;
+       })
+      }
+      r1.close();
+     
+      //add String to container
       function addText(string, elementId) {
         msg.innerText = string;
         bb.appendChild(msg);
         msg.scrollIntoView();
       }
 
-      function onLoad() {
-        setupBellboy();
-        setupWebsite();  
-      }
-  
+      //closes connection
     function onClose(event) {
       state.className = "fail";
       state.innerHTML = "Not connected";
       connected.innerHTML = "0";
-               }
-
+    }
+    // set up bellboy connection
       function setupBellboy() {
         // Creates a websocket connection as the bellboy.
         let bellboy = new WebSocket("ws://localhost:3000/WebSocket");
         bellboy.onopen = function () {
+          console.log('connection openned')
           state.className = "success";
-          state.innerHTML = "Connected to server";
           connected.innerHTML = "1";
           bellboy.send("Hello BellBoy");
           
@@ -77,12 +74,13 @@
             if (connected.readyState == "0") {
                onClose();
                state.innerHTML = "Unable to communicate with BellBoy server.";
+               state.className = "Fail";
             }
           }, 
           3000);
         };
       }
-
+      // set up website connection
       function setupWebsite() {
         // Creates a websocket connection as the website.
         let website = new WebSocket("ws://localhost:3000/Website");
@@ -91,25 +89,42 @@
           state.innerHTML = "Connected to server";
           connected.innerHTML = "1";
           website.send("Hello Website");
+
+          setInterval(function() {
+            if (connected.readyState == "0") {
+               onClose();
+               state.innerHTML = "Unable to communicate with BellBoy server.";
+               state.className = "Fail";
+            }
+          }, 
+          3000);
         };
       }
+        
+     
       /*
        * On load operation. Calls a number of functions once the DOM is ready.
        * ALL features should be called in this block.
        */
       window.addEventListener("load", function (event) {
-        // Feature functions:
-        onLoad();
-        onMessage();
 
-        // Test logging
-        for (var i = 0; i < 100; i++) {
-          addText(i + " sent", "bellboy-text");
-          addText(i + " received", "website-text");
-        }
-      
+        // Feature functions:
+        setupBellboy();
+        setupWebsite();
+        onMessage(load);
+
+        addText(msg,"bellboy-text");
+        addText(msg,"website-text");
+       
+       
 
       });
+      rl.on("close", function() {
+        process.exit(0);
+    
+      });
+
+    })()
     </script>
 
     <style>
