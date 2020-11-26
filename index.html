@@ -16,10 +16,11 @@
     <!-- Scripts and Styling -->
     <script type="application/javascript" async defer>
       /* JavaScript! */
+      var update_number = 1;
 
       /**
        * Checks if being served from localhost and returns proper backend URL.
-       * @returns {string} The URL for the backend.
+       * @returns {string} The URL for the backend websocket connection.
        */
       function getServerUrl() {
         var url = window.location.href.toString();
@@ -53,10 +54,16 @@
         let bellboy = new WebSocket(getServerUrl());
         bellboy.onopen = function () {
           console.log("connection opened");
+          bellboy.send("Hello BellBoy");
 
           setInterval(function () {
-            bellboy.send("Hello BellBoy");
-          }, 3000);
+            console.log(
+              "Sending hello #" +
+                update_number +
+                " to the backend from the bellboy..."
+            );
+            bellboy.send("Status update from bellboy no." + update_number++);
+          }, 1000);
         };
       }
       function setupWebsite() {
