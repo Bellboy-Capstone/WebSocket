@@ -16,8 +16,27 @@
     <!-- Scripts and Styling -->
     <script type="application/javascript" async defer>
       /* JavaScript! */
-  
 
+      /**
+       * Checks if being served from localhost and returns proper backend URL.
+       * @returns {string} The URL for the backend.
+       */
+      function getServerUrl() {
+        var url = window.location.href.toString();
+        // TODO: Replace this with deployment URL.
+        var server = "wss://" + location.host;
+
+        // If running in development, point requests to localhost:8000
+        if (url.indexOf("localhost") == 7) {
+          console.log(
+            "getServerUrl: In development mode, using local backend."
+          );
+          server = "ws://localhost:3000";
+        }
+
+        console.log("Using server " + server);
+        return server;
+      }
 
       function addText(string, elementId) {
         var bb = document.getElementById(elementId);
@@ -27,47 +46,39 @@
         msg.scrollIntoView();
       }
       function onClose(event) {
-        console.log('disconnected'); 
-    } 
-    function setupBellboy() {
-    
+        console.log("disconnected");
+      }
+      function setupBellboy() {
         // Creates a websocket connection as the bellboy.
-        let bellboy = new WebSocket("ws://localhost:3000/WebSocket");
+        let bellboy = new WebSocket(getServerUrl());
         bellboy.onopen = function () {
-          console.log('connection opened');
-          
-          setInterval(function() {
+          console.log("connection opened");
+
+          setInterval(function () {
             bellboy.send("Hello BellBoy");
-          }, 
-          3000);
+          }, 3000);
         };
       }
       function setupWebsite() {
-        
         // Creates a websocket connection as the website.
-        let website = new WebSocket("ws://localhost:3000/Website");
-        website.onopen = function () {   
-               
-
-          setInterval(function() {
-        
-             website.send("Hello Website"); 
-          }, 
-          3000);
+        let website = new WebSocket(getServerUrl());
+        website.onopen = function () {
+          setInterval(function () {
+            website.send("Hello Website");
+          }, 3000);
         };
       }
-        
 
       /*
        * On load operation. Calls a number of functions once the DOM is ready.
        * All features should be called in this block.
        */
-   
+
       window.addEventListener("load", function (event) {
         // Feature functions:
-          addText(" BellBoy sent hello", "bellboy-text");
-          addText(" Website received message", "website-text");
-        
+        addText(" BellBoy sent hello", "bellboy-text");
+        addText(" Website received message", "website-text");
+
         setupBellboy();
         setupWebsite();
         onClose();
