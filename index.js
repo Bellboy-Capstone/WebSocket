@@ -1,44 +1,59 @@
-var http = require("http");
+var http = require('http');
 var fs = require("fs");
 var WebSocket = require("ws");
-var webSocketServer = require("websocket").server;
-var webSocketsServerPort = process.env.PORT || 3000;
+var webSocketServer= require('websocket').server;
+var webSocketsServerPort = 3000;
+
+var clients = []; //list of connected clients
+
+//helps wtih input strings
+function htmlEntities(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 
 //http server
 var server = http.createServer(function (request, response) {
-    console.log((new Date()) + ' Received request for ' + request.url)
-    var homePageHTML = fs.readFileSync("./index.html");
-    response.writeHead(200, { "Content-Type": "text/html" });
-    response.write(homePageHTML);
-    response.end();
+  var homePageHTML = fs.readFileSync("./index.html");
+  response.writeHead(200, { "Content-Type": "text/html" });
+  response.write(homePageHTML);
+  response.end();
+});
+
+//websocket server
+server.listen(webSocketsServerPort, function() {
+console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
 });
 
 //websocket server request
-var bellboy = new webSocketServer({
-  httpServer: server,
+var wsServer = new webSocketServer({
+     httpServer: server
 });
 
-//when bellboy is connected
-bellboy.on('connection',function connection(ws){
-  // send message to all clients
-    ws.on("message", function incoming(message) {
-      bellboy.clients.forEach(function each(client) {
-          if (client !== ws && client.readyState === WebSocket.OPEN ) {
-            client.send(message);
-          }
+//gets called everytime a connection occurs with WebSocket
+wsServer.on('request', function(request) {
+    console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
+    var connection = request.accept(null, request.origin);
+    var index = clients.push(connection) - 1;
+    var client_name=true;
+    console.log((' Connection accepted.'));
+
+        const readline = require('readline').createInterface({
+            input: process.stdin,
+            output: process.stdout
         });
-      })
-    // close connection
-    ws.on("close", function (connection) {
-        console.log(" Peer " + connection.remoteAddress + " disconnected.");
- 
-    })
+        readline.question('Hello, who is this?', message=> {
+          console.log((new Date()) + ' Hello ' +  message + ', you are connected to BellBoy deivce');
 
-  });
+    });
 
-//websocket server
-server.listen(webSocketsServerPort, function () {
-  console.log(
-    new Date() + " Server is listening on port " + webSocketsServerPort
-  );
+    connection.on('close', function(connection) {
+        if (client_name !== true ) {
+            console.log(" Peer " + connection.remoteAddress + " disconnected.");
+             // remove client from the list of connected clients
+            clients.splice(index, 1);
+
+        }
+    });
 });
