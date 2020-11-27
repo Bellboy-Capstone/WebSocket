@@ -2,6 +2,10 @@ var app = require("express")();
 var http = require("http").createServer(app);
 var ws = require("ws");
 
+/**
+ * Set up HTTP and WebSocket server.
+ */
+
 wss = new ws.Server({ noServer: true });
 
 app.get("/", (req, res) => {
@@ -18,29 +22,20 @@ server.on("upgrade", function (request, socket, head) {
   });
 });
 
+/**
+ * Configure WebSocket responses.
+ */
+
 // Whenever a new client connects, this function is called.
 wss.on("connection", function (connection) {
-  // Adds an additional variable to the connection object, website:bool
   connection.website = false;
   connection.registered = false;
-
-  /**
-   * Called when a new connection is made.
-   */
   connection.on("open", function (data) {
     connection.send("Please register by replying BELLBOY or WEBSITE.");
   });
 
-  /**
-   * Called when the the client sends a message to the server.
-   */
   connection.on("message", function (data) {
-    var string = data;
-    console.log(data);
-
-    // Get incoming message data.
-
-    // This part of the statement runs if the device is unregistered.
+    var string = data.toString();
     if (connection.registered === false) {
       console.log("An unregistered device connected, and needs to register...");
       // Set up as a bellboy or website:
@@ -59,7 +54,7 @@ wss.on("connection", function (connection) {
     } else {
       // Forward messages to all websites if the message is from a bellboy.
       wss.clients.forEach(function (c) {
-        // Check if connection is a website.
+        // Forward message if connection is a website.
         if (c.website === true) {
           c.send(string);
         }
