@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/Bellboy-Capstone/WebSocket#readme",
   "dependencies": {
+    "express": "^4.17.1",
     "http": "^0.0.1-security",
+    "socket.io": "^3.0.3",
     "websocket": "^1.0.32",
     "ws": "^7.4.0"
   },

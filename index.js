@@ -1,36 +1,25 @@
-var http = require("http");
-var fs = require("fs");
-var WebSocket = require("ws");
-var WebSocketServer = require("websocket").server;
+var app = require("express")();
+var http = require("http").createServer(app);
+var ws = require("ws");
 
-// Getting the port from the environment is required to deploy on Heroku.
-var webSocketsServerPort = process.env.PORT || 3000;
+wss = new ws.Server({ noServer: true });
 
-// HTTP Server: Sends the index file (demo page) to http clients.
-var server = http.createServer(function (request, response) {
-  var homePageHTML = fs.readFileSync("./index.html");
-  response.writeHead(200, { "Content-Type": "text/html" });
-  response.write(homePageHTML);
-  response.end();
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
 });
 
-// Make the web server listen on port <webSocketsServerPort>
-server.listen(webSocketsServerPort, function () {
-  console.log(
-    new Date() + " Server is listening on port " + webSocketsServerPort
-  );
+var server = http.listen(process.env.PORT || 3000, () => {
+  console.log("listening on *:%s", process.env.PORT || 3000);
 });
 
-// Create a new WebSocketServer on the same port as the HTTP server.
-var wsServer = new WebSocketServer({
-  httpServer: server,
+server.on("upgrade", function (request, socket, head) {
+  wss.handleUpgrade(request, socket, head, (socket) => {
+    wss.emit("connection", socket, request);
+  });
 });
 
 // Whenever a new client connects, this function is called.
-wsServer.on("request", function (request) {
-  var connection = request.accept(null, request.origin);
-  console.log(new Date() + " Connection from origin " + request.origin + ".");
-
+wss.on("connection", function (connection) {
   // Adds an additional variable to the connection object, website:bool
   connection.website = false;
   connection.registered = false;
@@ -46,10 +35,10 @@ wsServer.on("request", function (request) {
    * Called when the the client sends a message to the server.
    */
   connection.on("message", function (data) {
+    var string = data;
     console.log(data);
 
     // Get incoming message data.
-    var string = data.utf8Data.toString();
 
     // This part of the statement runs if the device is unregistered.
     if (connection.registered === false) {
@@ -69,14 +58,12 @@ wsServer.on("request", function (request) {
       }
     } else {
       // Forward messages to all websites if the message is from a bellboy.
-      if (!connection.website) {
-        wsServer.connections.forEach(function (c) {
-          // Check if connection is a website.
-          if (c.website === true) {
-            c.send(string);
-          }
-        });
-      }
+      wss.clients.forEach(function (c) {
+        // Check if connection is a website.
+        if (c.website === true) {
+          c.send(string);
+        }
+      });
     }
   });
 });
