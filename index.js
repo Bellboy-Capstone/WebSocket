@@ -42,10 +42,12 @@ wss.on("connection", function (connection) {
       if (string.toUpperCase().startsWith("BELLBOY")) {
         console.log("A BELLBOY client registered.");
         connection.registered = true;
+        connection.send("REGISTERED - BELLBOY");
       } else if (string.toUpperCase().startsWith("WEBSITE")) {
         console.log("A WEBSITE client registered.");
         connection.registered = true;
         connection.website = true; // Indicate that this is a website.
+        connection.send("REGISTERED - WEBSITE");
       } else {
         // If neither BELLBOY or WEBSITE is specified, send an error message back.
         console.log("Incorrect first message, waiting for correct input.");
