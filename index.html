@@ -69,6 +69,17 @@
           }, 1000);
         };
       }
+
+      /**
+       * To be implemented in Website repository:
+       * "Live feed" with messages from all active bellboys.
+       *
+       * Create a scrolling box that, when onmessage is called and
+       * a new message is received, adds the message to the bottom of the
+       * scroll-box. Can be implemented based on the minimal
+       * example below.
+       *
+       */
       function setupWebsite() {
         // Creates a websocket connection as the website.
         let website = new WebSocket(getServerUrl());
