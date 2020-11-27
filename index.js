@@ -28,6 +28,7 @@ server.on("upgrade", function (request, socket, head) {
 
 // Whenever a new client connects, this function is called.
 wss.on("connection", function (connection) {
+  console.log("New connection.");
   connection.website = false;
   connection.registered = false;
   connection.on("open", function (data) {
@@ -35,6 +36,7 @@ wss.on("connection", function (connection) {
   });
 
   connection.on("message", function (data) {
+    console.log("Got message: " + data.toString());
     var string = data.toString();
     if (connection.registered === false) {
       console.log("An unregistered device connected, and needs to register...");
