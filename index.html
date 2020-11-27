@@ -54,7 +54,7 @@
         let bellboy = new WebSocket(getServerUrl());
         bellboy.onopen = function () {
           console.log("connection opened");
-          bellboy.send("Hello BellBoy");
+          bellboy.send("BELLBOY"); // Register.
 
           setInterval(function () {
             console.log(
@@ -62,7 +62,10 @@
                 update_number +
                 " to the backend from the bellboy..."
             );
-            bellboy.send("Status update from bellboy no." + update_number++);
+            var str = "Status update #" + update_number++ + " from bellboy.";
+            bellboy.send(str);
+            str = "SEND: " + str;
+            addText(str, "bellboy-text");
           }, 1000);
         };
       }
@@ -70,9 +73,12 @@
         // Creates a websocket connection as the website.
         let website = new WebSocket(getServerUrl());
         website.onopen = function () {
-          setInterval(function () {
-            website.send("Hello Website");
-          }, 3000);
+          website.send("WEBSITE"); // Register.
+          website.onmessage = function (event) {
+            console.log("Got data: " + event.data);
+            var str = "RECV: " + event.data;
+            addText(str, "website-text");
+          };
         };
       }
 

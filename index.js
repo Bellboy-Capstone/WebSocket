@@ -1,19 +1,12 @@
-var http = require('http');
+var http = require("http");
 var fs = require("fs");
 var WebSocket = require("ws");
-var webSocketServer= require('websocket').server;
-var webSocketsServerPort = process.env.PORT || 3000;  // Getting the port from the environment is required to deploy on Heroku.
+var WebSocketServer = require("websocket").server;
 
-var clients = []; //list of connected clients
+// Getting the port from the environment is required to deploy on Heroku.
+var webSocketsServerPort = process.env.PORT || 3000;
 
-//helps wtih input strings
-function htmlEntities(str) {
-    return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-//http server
+// HTTP Server: Sends the index file (demo page) to http clients.
 var server = http.createServer(function (request, response) {
   var homePageHTML = fs.readFileSync("./index.html");
   response.writeHead(200, { "Content-Type": "text/html" });
@@ -21,39 +14,71 @@ var server = http.createServer(function (request, response) {
   response.end();
 });
 
-//websocket server
-server.listen(webSocketsServerPort, function() {
-console.log((new Date()) + " Server is listening on port " + webSocketsServerPort);
+// Make the web server listen on port <webSocketsServerPort>
+server.listen(webSocketsServerPort, function () {
+  console.log(
+    new Date() + " Server is listening on port " + webSocketsServerPort
+  );
 });
 
-//websocket server request
-var wsServer = new webSocketServer({
-     httpServer: server
+// Create a new WebSocketServer on the same port as the HTTP server.
+var wsServer = new WebSocketServer({
+  httpServer: server,
 });
 
-//gets called everytime a connection occurs with WebSocket
-wsServer.on('request', function(request) {
-    console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
-    var connection = request.accept(null, request.origin);
-    var index = clients.push(connection) - 1;
-    var client_name=true;
-    console.log((' Connection accepted.'));
+// Whenever a new client connects, this function is called.
+wsServer.on("request", function (request) {
+  var connection = request.accept(null, request.origin);
+  console.log(new Date() + " Connection from origin " + request.origin + ".");
 
-        const readline = require('readline').createInterface({
-            input: process.stdin,
-            output: process.stdout
+  // Adds an additional variable to the connection object, website:bool
+  connection.website = false;
+  connection.registered = false;
+
+  /**
+   * Called when a new connection is made.
+   */
+  connection.on("open", function (data) {
+    connection.send("Please register by replying BELLBOY or WEBSITE.");
+  });
+
+  /**
+   * Called when the the client sends a message to the server.
+   */
+  connection.on("message", function (data) {
+    console.log(
+      "Got Message: %s from a %s",
+      data,
+      connection.website ? "Website" : "Bellboy"
+    );
+    var string = data.utf8Data.toString();
+
+    // This part of the statement runs if the device is unregistered.
+    if (connection.registered === false) {
+      console.log("An unregistered device connected, and needs to register...");
+      // Set up as a bellboy or website:
+      if (string.toUpperCase().startsWith("BELLBOY")) {
+        console.log("A BELLBOY client registered.");
+        connection.registered = true;
+      } else if (string.toUpperCase().startsWith("WEBSITE")) {
+        console.log("A WEBSITE client registered.");
+        connection.registered = true;
+        connection.website = true; // Indicate that this is a website.
+      } else {
+        // If neither BELLBOY or WEBSITE is specified, send an error message back.
+        console.log("Incorrect first message, waiting for correct input.");
+        connection.send("Failed to register, please send BELLBOY or WEBSITE.");
+      }
+    } else {
+      // Forward messages to all websites if the message is from a bellboy.
+      if (!connection.website) {
+        wsServer.connections.forEach(function (c) {
+          // Check if connection is a website.
+          if (c.website === true) {
+            c.send(string);
+          }
         });
-        readline.question('Hello, who is this?', message=> {
-          console.log((new Date()) + ' Hello ' +  message + ', you are connected to BellBoy deivce');
-
-    });
-
-    connection.on('close', function(connection) {
-        if (client_name !== true ) {
-            console.log(" Peer " + connection.remoteAddress + " disconnected.");
-             // remove client from the list of connected clients
-            clients.splice(index, 1);
-
-        }
-    });
+      }
+    }
+  });
 });
