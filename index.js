@@ -46,11 +46,9 @@ wsServer.on("request", function (request) {
    * Called when the the client sends a message to the server.
    */
   connection.on("message", function (data) {
-    console.log(
-      "Got Message: %s from a %s",
-      data,
-      connection.website ? "Website" : "Bellboy"
-    );
+    console.log(data);
+
+    // Get incoming message data.
     var string = data.utf8Data.toString();
 
     // This part of the statement runs if the device is unregistered.
