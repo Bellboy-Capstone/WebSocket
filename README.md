@@ -8,5 +8,5 @@ A **live demo** emulating a bellboy and website is deployed as the frontend for 
 
 Active Deployments:
 
-1. Development <https://bellboy-realtime.herokuapp.com/>
-1. Production <https://websocket-bellboy.herokuapp.com/> (configuration needed)
+1. Development <https://websocket-bellboy.herokuapp.com/>
+
